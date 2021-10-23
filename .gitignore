@@ -1,0 +1,14 @@
+temp/
+logs/
+.idea
+.ropeproject
+.settings
+*.log
+*.pyc
+*.py~
+*.pyo
+*.swp
+*.o
+*.c
+*.xml
+*.iml
