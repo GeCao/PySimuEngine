@@ -42,7 +42,7 @@ vec3 PhongModel() {
     float s_dot_n = max(dot(s, n), 0.0);
 
     vec3 diffuseColor = vec3(texture2D(sampler0, Texcoord.st));
-    vec3 diffuse = diffuseColor; // * lightColor * s_dot_n;
+    vec3 diffuse = diffuseColor * lightColor * s_dot_n;
 
     vec3 specular = vec3(0.0);
     if (s_dot_n > 0.0) {
@@ -90,7 +90,7 @@ void shadeWithShadow() {
         shadow = ShadowCalculation(ShadowCoord, bias);
     }
 
-    FragColor = vec4((diffAndSpec * (1 - shadow) + 0.0 * ambient * (1 - shadow)), 1.0);
+    FragColor = vec4((diffAndSpec * (1 - shadow) + ambient * (1 - shadow)), 1.0);
 }
 
 void main()

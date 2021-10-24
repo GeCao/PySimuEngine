@@ -80,6 +80,8 @@ class OpenglPipe:
 
         self.bind_buffer.draw_VAO()
 
+        self.core_component.scene_component.render()
+
     def update(self):
         self.VBO_Resources()
 

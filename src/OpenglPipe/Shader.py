@@ -87,6 +87,7 @@ class Shader:
 
         self.depthTex = glGenTextures(1)
         self.shadowFBO = glGenFramebuffers(1)
+        print("A message from PySimuEngine.Shader: A depth map { ", self.depthTex, " } has been established")
 
         glBindTexture(GL_TEXTURE_2D, self.depthTex)
 
@@ -154,13 +155,15 @@ class Shader:
         self.uniform_dict['viewPos'] = self.core_component.camera.eye
         self.uniform_dict['lightPos'] = self.lightPos
         self.uniform_dict['lightColor'] = self.lightColor
-        self.uniform_dict['objectColor'] = np.array([1, 0.5, 0.31], dtype=np.float32)
         self.uniform_dict['useShadow'] = useShadow
 
         _, center, eyeup = self.core_component.camera.get_look_at_params()
         eye = self.uniform_dict['lightPos']
         shadow_mat_p = self.core_component.camera.get_ortho_projection_mat()
         shadow_mat_v = compute_lookat_mat(eye, center, eyeup, my_dtype=np.float32)
+
+        if shader_name == "glossy":
+            self.core_component.scene_component.hlp_activate_cube_map(shaderProgram)
 
         if useShadow:
             self.uniform_dict['ShadowMatrix'] = shadow_mat_v.dot(shadow_mat_p)

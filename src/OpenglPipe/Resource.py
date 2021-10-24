@@ -31,11 +31,11 @@ class MaterialResource(Resource):
             self.uniform_dict['material.specular'] = np.array([0.5, 0.5, 0.5], dtype=np.float32)
             self.uniform_dict['material.shininess'] = float(32.0)
         elif self.material_name == "Wood":
-            self.uniform_dict['sampler0'] = _read_img_2d(os.path.join(self.resource_component.scene_path, "textures/png/wood_box.png")) / 255.0
+            self.uniform_dict['sampler0'] = _read_img_2d(os.path.join(self.resource_component.scene_path, "textures/png/wood_box.png"), np.float32) / 255.0
             self.uniform_dict['material.ambient'] = np.array([0.2, 0.2, 0.2], dtype=np.float32)
             self.uniform_dict['material.diffuse'] = np.array([1, 0.5, 0.31], dtype=np.float32)
             self.uniform_dict['material.specular'] = np.array([0.5, 0.5, 0.5], dtype=np.float32)
-            self.uniform_dict['material.shininess'] = float(3.0)
+            self.uniform_dict['material.shininess'] = float(32.0)
 
 
 class MeshResource(Resource):

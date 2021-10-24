@@ -69,7 +69,6 @@ class MyPygame:
             self.mouse_clicked = False
 
         if self.mouse_clicked and event.type == MOUSEMOTION:
-            print("Moving")
             new_mouse_pos = np.array(pygame.mouse.get_pos())
             move_vec = new_mouse_pos - self.mouse_pos
             anticlockwise = [True if move_vec[0] > 0 else False, True if move_vec[0] > 0 else False]
@@ -79,7 +78,6 @@ class MyPygame:
             move_angle_unit = [move_vec[0] if anticlockwise[0] else -move_vec[0],
                                move_vec[1] if anticlockwise[1] else -move_vec[1]]
             eye = get_rotation_mat_from_euler_angle(cross(eye - center, eye_up), move_angle_unit[1]).dot(eye)
-            # print(eye.shape)
             eye = get_rotation_mat_from_euler_angle(eye_up, move_angle_unit[0]).dot(eye)
             self.core_component.camera.update_mvp(eye=eye)
 

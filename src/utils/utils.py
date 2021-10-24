@@ -93,8 +93,8 @@ def _save_img_2d(array, filename, colormap='RGB'):
     img.save(filename)
 
 
-def _read_img_2d(file_path):
-    return np.array(imageio.imread(file_path), dtype=default_dtype)
+def _read_img_2d(file_path, my_dtype=default_dtype):
+    return np.array(imageio.imread(file_path), my_dtype)
 
 
 def _process_img_2d(array, colormap='RGB'):

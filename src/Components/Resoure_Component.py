@@ -28,7 +28,7 @@ class ResourceComponent:
 
     def load_materials(self):
         self.register_resource('material', 'sphere', material_name='normal')
-        self.register_resource('material', 'camelhead', material_name='Wood')
+        self.register_resource('material', 'camelhead', material_name='glossy')
         self.register_resource('material', 'plane', material_name='Wood')
 
     def get_material_list(self):

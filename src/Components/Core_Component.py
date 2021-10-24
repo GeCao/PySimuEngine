@@ -4,6 +4,7 @@ import os
 from ..PyGame.PyGame import MyPygame
 from ..OpenglPipe.OpenglPipe import OpenglPipe
 from .Resoure_Component import ResourceComponent
+from .Scene_Component import SceneComponent
 from ..OpenglPipe.Camera import Camera
 from ..Simulation.Fluid_LBM.LBM_D2Q9 import LBM_D2Q9
 from ..Simulation.Fluid_FVM.FVM_AdvectionEquation import FVM_AdvectionEquation
@@ -15,6 +16,7 @@ class CoreComponent:
         self.root_path = os.path.abspath(os.curdir)
         self.src_path = os.path.join(self.root_path, 'src')
         self.resource_component = None
+        self.scene_component = None
         self.my_pygame = None
         self.opengl_pipe = None
         self.fluid_solver = None
@@ -32,6 +34,9 @@ class CoreComponent:
         self.opengl_pipe = OpenglPipe(self)
         self.my_pygame.initialization()
         self.opengl_pipe.initialization()
+
+        self.scene_component = SceneComponent(self)
+        self.scene_component.initialization()
 
         # self.fluid_solver = LBM_D2Q9(self)
         # self.fluid_solver.initialization()
