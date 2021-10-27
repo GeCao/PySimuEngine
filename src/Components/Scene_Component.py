@@ -5,6 +5,7 @@ import sys
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 
+from ..Simulation.FFTOcean import FFTOcean
 from ..utils.utils import _read_img_2d
 
 
@@ -34,6 +35,8 @@ class SceneComponent:
 
         self.skyboxVAO = None
         self.skyboxVBO = None
+
+        self.ocean = FFTOcean(self.core_component)
 
         self.initialized = False
 
@@ -126,6 +129,8 @@ class SceneComponent:
 
         self.setup()
 
+        self.ocean.initialization()
+
         self.initialized = True
 
     def load_cube_map(self):
@@ -160,6 +165,9 @@ class SceneComponent:
         glBindTexture(GL_TEXTURE_CUBE_MAP, self.textureID)
         CM_loc = glGetUniformLocation(shaderProgram, 'skybox')
         glUniform1i(CM_loc, self.textureID)
+
+    def update(self):
+        self.ocean.update()
 
     def render(self):
         glDepthFunc(GL_LEQUAL)

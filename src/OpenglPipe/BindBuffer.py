@@ -14,6 +14,11 @@ class BindBuffer:
     def initialization(self):
         self.initialized = True
 
+    def sub_change_buffer(self, VAO, VBO, format, data):
+        glBindVertexArray(VAO)
+        glBindBuffer(format, VBO)
+        glBufferSubData(format, 0, sys.getsizeof(data), data)
+
     def bind_VAO(self, VAO_name, data=None, indices=None, Pointer_info=None):
         VAO = glGenVertexArrays(1)
         glBindVertexArray(VAO)
@@ -46,6 +51,7 @@ class BindBuffer:
             self.VAO_dict[VAO_name] = [VAO]
             self.VAO_indices_size[VAO_name] = [len(indices)]
         glBindVertexArray(0)  # 复位VAO
+        return VAO, VBO
 
     def draw_VAO(self, push_for_shadow_pass=False):
         for VAO_name in self.VAO_dict.keys():

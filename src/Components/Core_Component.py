@@ -45,6 +45,7 @@ class CoreComponent:
 
     def update(self):
         self.camera.update()
+        self.scene_component.update()
         self.opengl_pipe.update()
         # self.fluid_solver.update()
 
