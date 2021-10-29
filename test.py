@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch
 
 
-'''
+
 # 继承枚举类
 class color(Enum):
     YELLOW = np.int
@@ -28,8 +28,9 @@ print(A.sum(dim=0))
 
 model_mat = np.array([1,1,1])
 print(model_mat.shape)
-'''
 
+
+"""
 import numpy as np
 np.random.seed(0)
 a = np.linspace(start=0, stop=4, num=5).repeat(5).reshape(5, 5)
@@ -47,5 +48,5 @@ print(transformed.shape)
 print(np.all(np.abs(np.fft.ifft(transformed) - wave) < 10 ** -9))  #对变换后的结果应用ifft函数，应该可以近似地还原初始信号。
 plot(transformed)  #使用Matplotlib绘制变换后的信号。
 show()
-
+"""
 

@@ -5,6 +5,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
+### Run Sample
+![result1](data/PCF.png)
+
 ### Features
 
 * Rendering
