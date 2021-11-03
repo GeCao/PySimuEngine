@@ -20,14 +20,26 @@ A = np.array([[1, 2],
 B = np.array([[1, 1],
               [3, 4]])
 
-A = torch.Tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).to(torch.float32).to("cuda")
-print(A)
+A = torch.Tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15]]).to(torch.float32).to("cpu")
+print(A[::3, :])
 print(F.pad(A[..., 1:, :].unsqueeze(0), pad=(0, 0, 0, 1), mode='constant').squeeze(0).view(-1))
 
 print(A.sum(dim=0))
 
 model_mat = np.array([1,1,1])
 print(model_mat.shape)
+
+shader_source = "in vec2 Temp_vec \n #include \"PCF.glsl\"  \n \n void main() \n{}  "
+if "#include" in shader_source:
+    shader_source_split = shader_source.split("#include ")
+    print(shader_source_split)
+    for i in range(len(shader_source_split)):
+        if i > 0:
+            split_idx = (shader_source_split[1].find('\"', 1))
+            path_file = shader_source_split[1][1:split_idx]
+            left_str = shader_source_split[1][split_idx + 1:]
+            print(path_file)
+            print(left_str)
 
 
 """

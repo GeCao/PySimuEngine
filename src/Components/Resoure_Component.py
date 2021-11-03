@@ -19,7 +19,7 @@ class ResourceComponent:
         self.initialized = False
 
     def initialization(self):
-        self.register_resource('mesh', 'sphere', 'obj', scale=np.array([0.15, 0.15, 0.15]), translate=np.array([1.2, 1.2, 2.0]))
+        self.register_resource('mesh', 'sphere', 'obj', scale=np.array([0.45, 0.45, 0.45]), translate=np.array([0.6, -0.05, 0.6]))
         self.register_resource('mesh', 'camelhead', 'obj')
         self.register_resource('mesh', 'plane', 'obj', scale=np.array([5, 0.5, 5]), translate=np.array([0, -0.38, 0]))
 
@@ -27,7 +27,7 @@ class ResourceComponent:
         self.initialized = True
 
     def load_materials(self):
-        self.register_resource('material', 'sphere', material_name='normal')
+        self.register_resource('material', 'sphere', material_name='glossy')
         self.register_resource('material', 'camelhead', material_name='glossy')
         self.register_resource('material', 'plane', material_name='Wood')
 

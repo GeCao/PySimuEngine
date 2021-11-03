@@ -70,14 +70,14 @@ class OpenglPipe:
 
         self.core_component.camera.set_eye_position(new_eye=old_eye)
 
-    def render_pass(self):
+    def render_pass(self, useShadow=True):
         glViewport(0, 0, self.width, self.height)
         self.clear_buffer()
 
         self.set_matrix()
 
         for shader_name_in_using in self.core_component.resource_component.get_material_list():
-            self.shader.activate_shader(shader_name=shader_name_in_using, useShadow=True) # so called activate shader, actually means uniform binding
+            self.shader.activate_shader(shader_name=shader_name_in_using, useShadow=useShadow) # so called activate shader, actually means uniform binding
         glCullFace(GL_BACK)
 
         self.bind_buffer.draw_VAO()

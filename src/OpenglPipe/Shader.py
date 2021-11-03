@@ -42,32 +42,51 @@ class Shader:
         self.initialized = True
 
     def load_shader(self, shader_name, vertexShaderSource=None, fragmentShaderSource=None):
-        if vertexShaderSource is None:
-            vert_file_path = os.path.join(self.shaders_root_path, shader_name + '.vert')
-            vertexShaderSource = self.read_file_as_str(vert_file_path)
-        if fragmentShaderSource is None:
-            frag_file_path = os.path.join(self.shaders_root_path, shader_name + '.frag')
-            fragmentShaderSource = self.read_file_as_str(frag_file_path)
+        try:
+            if vertexShaderSource is None:
+                vert_file_path = os.path.join(self.shaders_root_path, shader_name + '.vert')
+                vertexShaderSource = self.read_file_as_str(vert_file_path)
+            if fragmentShaderSource is None:
+                frag_file_path = os.path.join(self.shaders_root_path, shader_name + '.frag')
+                fragmentShaderSource = self.read_file_as_str(frag_file_path)
 
-        vertexShader = glCreateShader(GL_VERTEX_SHADER)
-        glShaderSource(vertexShader, vertexShaderSource)
-        glCompileShader(vertexShader)
+            vertexShader = glCreateShader(GL_VERTEX_SHADER)
+            glShaderSource(vertexShader, vertexShaderSource)
+            glCompileShader(vertexShader)
 
-        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
-        glShaderSource(fragmentShader, fragmentShaderSource)
-        glCompileShader(fragmentShader)
+            fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
+            glShaderSource(fragmentShader, fragmentShaderSource)
+            glCompileShader(fragmentShader)
 
-        shaderProgram = glCreateProgram()  # 创建一个GLSL主程序
-        glAttachShader(shaderProgram, vertexShader)
-        glAttachShader(shaderProgram, fragmentShader)  # 将两个shader挂载到主程序上
-        glLinkProgram(shaderProgram)  # 链接shader程序。编译shader的步骤在此之前。接下来会详细介绍
+            shaderProgram = glCreateProgram()  # 创建一个GLSL主程序
+            glAttachShader(shaderProgram, vertexShader)
+            glAttachShader(shaderProgram, fragmentShader)  # 将两个shader挂载到主程序上
+            glLinkProgram(shaderProgram)  # 链接shader程序。编译shader的步骤在此之前。接下来会详细介绍
 
-        glDeleteShader(vertexShader)
-        glDeleteShader(fragmentShader)
+            glDeleteShader(vertexShader)
+            glDeleteShader(fragmentShader)
 
-        self.shaders_dict[shader_name] = shaderProgram
+            self.shaders_dict[shader_name] = shaderProgram
 
-        vert_frag_source_split = (vertexShaderSource + '\n' + fragmentShaderSource).split('uniform ')
+            vert_frag_source_split = (vertexShaderSource + '\n' + fragmentShaderSource).split('uniform ')
+        except:
+            glsl_file_path = os.path.join(self.shaders_root_path, shader_name + '.glsl')
+            glslShaderSource = self.read_file_as_str(glsl_file_path)
+
+            glslShader = glCreateShader(GL_FRAGMENT_SHADER)
+            glShaderSource(glslShader, glslShaderSource)
+            glCompileShader(glslShader)
+
+            shaderProgram = glCreateProgram()  # 创建一个GLSL主程序
+            glAttachShader(shaderProgram, glslShader)  # 将shader挂载到主程序上
+            glLinkProgram(shaderProgram)  # 链接shader程序。编译shader的步骤在此之前。接下来会详细介绍
+
+            glDeleteShader(glslShader)
+
+            self.shaders_dict[shader_name] = shaderProgram
+
+            vert_frag_source_split = (glslShaderSource).split('uniform ')
+
         self.shaders_uniform_dict[shader_name] = []
         for i, str_piece in enumerate(vert_frag_source_split):
             if i > 0:
@@ -114,13 +133,29 @@ class Shader:
             self.load_shader(shader_name)
         return self.shaders_dict[shader_name]
 
-    def read_file_as_str(self, file_path):
+    def _read_file_as_str(self, file_path):
         # 判断路径文件存在
         if not os.path.isfile(file_path):
             raise TypeError(file_path + " does not exist")
 
         all_the_text = open(file_path).read()
         return all_the_text
+
+    def read_file_as_str(self, file_path):
+        shaderSource = self._read_file_as_str(file_path)
+        if "#include" in shaderSource:
+            shader_source_split = shaderSource.split("#include ")
+            final_shaderSource = shader_source_split[0]
+            for i in range(len(shader_source_split)):
+                if i > 0:
+                    split_idx = (shader_source_split[1].find('\"', 1))
+                    path_file = shader_source_split[1][1:split_idx]
+                    left_str = shader_source_split[1][split_idx + 1:]
+                    included_shaderSource = self.read_file_as_str(os.path.join(self.shaders_root_path, path_file))
+                    final_shaderSource = final_shaderSource + included_shaderSource + left_str
+            return final_shaderSource
+        else:
+            return shaderSource
 
     def bind_uniform_for_shader(self, shader_name, uniform_name, uniform_data):
         shaderProgram = self.get_shaderProgram(shader_name)
@@ -162,12 +197,11 @@ class Shader:
         shadow_mat_p = self.core_component.camera.get_ortho_projection_mat()
         shadow_mat_v = compute_lookat_mat(eye, center, eyeup, my_dtype=np.float32)
 
-        if shader_name == "glossy":
+        if 'skybox' in uniform_list:
             self.core_component.scene_component.hlp_activate_cube_map(shaderProgram)
-
-        if useShadow:
+        elif 'ShadowMatrix' in uniform_list and useShadow:
             self.uniform_dict['ShadowMatrix'] = shadow_mat_v.dot(shadow_mat_p)
-
+        elif 'shadowMap' in uniform_list and useShadow:
             glActiveTexture(GL_TEXTURE0 + self.depthTex)
             glBindTexture(GL_TEXTURE_2D, self.depthTex)
             SM_loc = glGetUniformLocation(shaderProgram, 'ShadowMap')
