@@ -119,6 +119,5 @@ class BindShaderUniform:
 
         elif type(uniform_data) == bool:
             glUniform1i(location, uniform_data)
-
         # else:
             # print("The shader uniform: {", uniform_name, "} has not been binded for some reason")

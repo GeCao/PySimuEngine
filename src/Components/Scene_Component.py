@@ -171,6 +171,8 @@ class SceneComponent:
         self.ocean.update()
 
     def render(self):
+        self.core_component.opengl_pipe.shader.activate_shader(shader_name='ocean', useShadow=True)
+
         glDepthFunc(GL_LEQUAL)
         # glDepthMask(GL_FALSE)
         shader_name = "skybox"

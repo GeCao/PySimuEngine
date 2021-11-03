@@ -42,7 +42,7 @@ class ResourceComponent:
             material_resource.initialization()
             self.material_list[material_name] = material_resource
 
-    def register_resource(self, resource_type, resource_name,
+    def register_resource(self, resource_type, resource_name=None,
                           filename_extension=None, scale=None, translate=None,
                           material_name=None):
         if resource_type == "mesh":
@@ -52,7 +52,8 @@ class ResourceComponent:
             self.mesh_dict[resource_name] = mesh_resource
         elif resource_type == 'material':
             self.register_single_material(material_name)
-            self.material_dict[resource_name] = material_name
+            if resource_name is not None:
+                self.material_dict[resource_name] = material_name
 
     def get_mesh_resource(self, resource_name):
         if resource_name in self.mesh_dict:

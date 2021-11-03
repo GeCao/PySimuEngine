@@ -151,7 +151,8 @@ class FFTOcean:
                         indices.append(int(i * self.grid_resolution + (j + 1)))
                         indices.append(int((i + 1) * self.grid_resolution + (j + 1)))
                 indices = np.array(indices, dtype=np.int)
-                self.VAO, self.VBO = self.core_component.opengl_pipe.bind_buffer.bind_VAO("glossy",
+                self.core_component.resource_component.register_resource('material', material_name="ocean")
+                self.VAO, self.VBO = self.core_component.opengl_pipe.bind_buffer.bind_VAO("ocean",
                                                                                           data=data,
                                                                                           indices=indices,
                                                                                           Pointer_info=['vertices',

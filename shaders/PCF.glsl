@@ -1,5 +1,13 @@
 uniform sampler2D ShadowMap;
 
+float GetMyDepth(vec4 fragPosLightSpace)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float currentDepth = projCoords.z;
+    return currentDepth;
+}
+
 float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 {
     // perform perspective divide

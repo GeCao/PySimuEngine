@@ -89,6 +89,8 @@ class Shader:
         self.shaders_uniform_dict[shader_name] = []
         for i, str_piece in enumerate(vert_frag_source_split):
             if i > 0:
+                if vert_frag_source_split[i - 1][-1] == '/':
+                    continue
                 str_piece_split = str_piece.split()
                 uniform_type = str_piece_split[0]
                 uniform_name = str_piece_split[1][:-1]  # There might exist a ';'
@@ -148,6 +150,9 @@ class Shader:
             final_shaderSource = shader_source_split[0]
             for i in range(len(shader_source_split)):
                 if i > 0:
+                    if shader_source_split[i - 1][-1] == '/':
+                        final_shaderSource = final_shaderSource + shader_source_split[i]
+                        continue
                     split_idx = (shader_source_split[1].find('\"', 1))
                     path_file = shader_source_split[1][1:split_idx]
                     left_str = shader_source_split[1][split_idx + 1:]
@@ -199,17 +204,21 @@ class Shader:
 
         if 'skybox' in uniform_list:
             self.core_component.scene_component.hlp_activate_cube_map(shaderProgram)
-        elif 'ShadowMatrix' in uniform_list and useShadow:
+        if 'ShadowMatrix' in uniform_list and useShadow:
             self.uniform_dict['ShadowMatrix'] = shadow_mat_v.dot(shadow_mat_p)
-        elif 'shadowMap' in uniform_list and useShadow:
+        if 'shadowMap' in uniform_list and useShadow:
             glActiveTexture(GL_TEXTURE0 + self.depthTex)
             glBindTexture(GL_TEXTURE_2D, self.depthTex)
             SM_loc = glGetUniformLocation(shaderProgram, 'ShadowMap')
             glUniform1i(SM_loc, self.depthTex)
-
-        material_uniform_dict = self.core_component.resource_component.get_material_resource(shader_name).uniform_dict
+        if 'ShallowWaterColor' in uniform_list:
+            self.uniform_dict['ShallowWaterColor'] = np.array([0.1, 0.7, 0.3], dtype=np.float32)
+        if 'FarWaterColor' in uniform_list:
+            self.uniform_dict['FarWaterColor'] = np.array([0.01, 0.07, 0.03], dtype=np.float32)
 
         for i, uniform_name in enumerate(self.uniform_dict.keys()):
             self.bind_shader_uniform.bind_uniform(shaderProgram, uniform_name, self.uniform_dict[uniform_name])
+
+        material_uniform_dict = self.core_component.resource_component.get_material_resource(shader_name).uniform_dict
         for i, uniform_name in enumerate(material_uniform_dict.keys()):
             self.bind_shader_uniform.bind_uniform(shaderProgram, uniform_name, material_uniform_dict[uniform_name])
