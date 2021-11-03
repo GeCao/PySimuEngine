@@ -26,6 +26,12 @@ class AutoEnum(Enum):
         return None
 
 
+class MessageAttribute(Enum):
+    EInfo = 0
+    EWarn = 1
+    EError = 2
+
+
 def degToRad(theta):
     theta_calmp = theta - 360 * math.floor(theta / 360)
     return theta_calmp * math.pi / 180.0
@@ -50,9 +56,12 @@ def get_rotation_mat_from_euler_angle(vec, theta, my_dtype=default_dtype):
     normalized_vec = normalize(vec)
     x, y, z = normalized_vec[0], normalized_vec[1], normalized_vec[2]
     cos_theta, sin_theta = math.cos(degToRad(theta)), math.sin(degToRad(theta))
-    return numpy.array([[cos_theta + (1 - cos_theta)*x*x, x*y*(1 - cos_theta) - z*sin_theta, x*z*(1 - cos_theta) + y*sin_theta],
-                        [x*y*(1 - cos_theta) + z*sin_theta, cos_theta + (1 - cos_theta)*y*y, y*z*(1 - cos_theta) - x*sin_theta],
-                        [x*z*(1 - cos_theta) - y*sin_theta, y*z*(1 - cos_theta) + x*sin_theta, cos_theta + (1 - cos_theta)*z*z]],
+    return numpy.array([[cos_theta + (1 - cos_theta) * x * x, x * y * (1 - cos_theta) - z * sin_theta,
+                         x * z * (1 - cos_theta) + y * sin_theta],
+                        [x * y * (1 - cos_theta) + z * sin_theta, cos_theta + (1 - cos_theta) * y * y,
+                         y * z * (1 - cos_theta) - x * sin_theta],
+                        [x * z * (1 - cos_theta) - y * sin_theta, y * z * (1 - cos_theta) + x * sin_theta,
+                         cos_theta + (1 - cos_theta) * z * z]],
                        dtype=my_dtype)
 
 
@@ -65,6 +74,7 @@ def compute_ortho_mat(left, right, bottom, top, near, far, my_dtype=default_dtyp
                      [0.0, 2.0 / (top - bottom), 0.0, -(top + bottom) / (top - bottom)],
                      [0.0, 0.0, -2.0 / (far - near), -(far + near) / (far - near)],
                      [0.0, 0.0, 0.0, 1.0]], dtype=my_dtype).T
+
 
 def compute_perspective_mat(fov, aspect, near, far, my_dtype=default_dtype):
     fov_cot = 1.0 / math.tan(degToRad(fov / 2.0))
@@ -86,6 +96,7 @@ def compute_lookat_mat(eye, center, up, my_dtype=default_dtype):
     matrix[2, 0:3] = Z
     matrix[0:3, 3] = [-np.dot(X, eye), -np.dot(Y, eye), -np.dot(Z, eye)]
     return matrix.T
+
 
 def _save_img_2d(array, filename, colormap='RGB'):
     array = _process_img_2d(array, colormap)
@@ -109,18 +120,18 @@ def _process_img_2d(array, colormap='RGB'):
             )
     max_ = np.absolute(array.max())
     min_ = array.min() if array.min() >= 0 else -max_
-    array = (array-min_) / (max_-min_)  # [0, 1]
+    array = (array - min_) / (max_ - min_)  # [0, 1]
     if colormap == 'RGB':
-        array = array*255.0
+        array = array * 255.0
     elif colormap == 'RDBU':
-        array = plt.cm.RdBu(array)*255.0
+        array = plt.cm.RdBu(array) * 255.0
     elif colormap == 'SEISMIC':
-        array = plt.cm.seismic(array)*255.0
+        array = plt.cm.seismic(array) * 255.0
     elif colormap == 'ORRD':
         cc = plt.cm.get_cmap("OrRd")
-        array = np.minimum(1, cc(array)/cc(0))*255.0
+        array = np.minimum(1, cc(array) / cc(0)) * 255.0
     elif colormap == 'HOT':
-        array = plt.cm.hot(array)*255.0
+        array = plt.cm.hot(array) * 255.0
     else:
         raise ValueError('Colormap {} not supported.'.format(colormap))
     array = np.uint8(array)

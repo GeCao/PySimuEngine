@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from enum import Enum
 import numpy as np
+from ..utils.utils import MessageAttribute
 
 
 class DataType(Enum):
@@ -45,7 +46,8 @@ class BindShaderUniform:
                 if uniform_name in self.texture_name_ID_map and not push_texture_change:
                     return
                 TexID = glGenTextures(1)
-                print("TexID of ", uniform_name, ": = ", TexID)
+                self.core_component.log_component.Slog(MessageAttribute.EInfo,
+                    "A message from PySimuEngine.BindShaderUniform: TexID of {} = {}".format(uniform_name, TexID))
                 glBindTexture(GL_TEXTURE_2D, TexID)
 
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)

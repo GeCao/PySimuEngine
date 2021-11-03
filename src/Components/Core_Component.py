@@ -4,6 +4,7 @@ import os
 from ..PyGame.PyGame import MyPygame
 from ..OpenglPipe.OpenglPipe import OpenglPipe
 from .Resoure_Component import ResourceComponent
+from .Log_Component import LogComponent
 from .Scene_Component import SceneComponent
 from ..OpenglPipe.Camera import Camera
 from ..Simulation.Fluid_LBM.LBM_D2Q9 import LBM_D2Q9
@@ -15,6 +16,7 @@ class CoreComponent:
     def __init__(self):
         self.root_path = os.path.abspath(os.curdir)
         self.src_path = os.path.join(self.root_path, 'src')
+        self.log_component = None
         self.resource_component = None
         self.scene_component = None
         self.my_pygame = None
@@ -26,6 +28,9 @@ class CoreComponent:
     def initialization(self):
         self.camera = Camera(self)
         self.camera.initialization()
+
+        self.log_component = LogComponent(self, log_to_disk=True)
+        self.log_component.initialization()
 
         self.resource_component = ResourceComponent(self)
         self.resource_component.initialization()

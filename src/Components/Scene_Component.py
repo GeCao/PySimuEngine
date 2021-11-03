@@ -6,7 +6,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 
 from ..Simulation.FFTOcean import FFTOcean
-from ..utils.utils import _read_img_2d
+from ..utils.utils import _read_img_2d, MessageAttribute
 
 
 class SceneComponent:
@@ -136,7 +136,8 @@ class SceneComponent:
     def load_cube_map(self):
         self.textureID = glGenTextures(1)
         glBindTexture(GL_TEXTURE_CUBE_MAP, self.textureID)
-        print("A message from PySimuEngine.SceneComponent: A cube map {", self.textureID, "} has been established")
+        self.core_component.log_component.Slog(MessageAttribute.EInfo,
+            "A message from PySimuEngine.SceneComponent: A cube map {} has been established".format(self.textureID))
 
         for i, filename in enumerate(self.cubemap_files):
             image_data = _read_img_2d(os.path.join(self.cubemap_path, self.cubemap_dirs[2], filename), np.float32) / 255.0

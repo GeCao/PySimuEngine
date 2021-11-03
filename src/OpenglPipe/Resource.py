@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 import os
-from ..utils.utils import _read_img_2d
+from ..utils.utils import _read_img_2d, MessageAttribute
 
 class Resource:
     def __init__(self, resource_component, file_path=None):
@@ -153,8 +153,7 @@ class MeshResource(Resource):
                 self.data[vert_idx_1][6:8] = texcoords[f_texcoords_idx[3 * i]][0:2]
                 self.data[vert_idx_2][6:8] = texcoords[f_texcoords_idx[3 * i + 1]][0:2]
                 self.data[vert_idx_3][6:8] = texcoords[f_texcoords_idx[3 * i + 2]][0:2]
-        print("all the vert nums: ", index_vert)
-        print("face nums: ", len(self.faces))
-        print("texcoord nums: ", len(f_texcoords_idx))
-        print("normal nums: ", len(f_normals_idx))
-        print("======================================")
+        self.resource_component.core_component.log_component.Slog(MessageAttribute.EInfo,
+            "Newly read an object with all the vert nums = {}, face nums = {}, texcoord nums = {}, normal nums = {}".
+                                                                  format(index_vert, len(self.faces), len(f_texcoords_idx),
+                                                                         len(f_normals_idx)))

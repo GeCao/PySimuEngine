@@ -1,9 +1,8 @@
 import os
-import sys
 
 import numpy as np
 from OpenGL.GL import *
-from ..utils.utils import compute_perspective_mat, compute_lookat_mat, compute_ortho_mat
+from ..utils.utils import compute_perspective_mat, compute_lookat_mat, compute_ortho_mat, MessageAttribute
 
 from .Bind_Shader_Uniform import BindShaderUniform
 
@@ -93,7 +92,6 @@ class Shader:
                 str_piece_split = str_piece.split()
                 uniform_type = str_piece_split[0]
                 uniform_name = str_piece_split[1][:-1]  # There might exist a ';'
-                # print(uniform_type, uniform_name)
                 self.shaders_uniform_dict[shader_name].append(uniform_name)
 
     def get_shadowMap_size(self):
@@ -106,7 +104,8 @@ class Shader:
 
         self.depthTex = glGenTextures(1)
         self.shadowFBO = glGenFramebuffers(1)
-        print("A message from PySimuEngine.Shader: A depth map { ", self.depthTex, " } has been established")
+        self.core_component.log_component.Slog(MessageAttribute.EInfo,
+            "A message from PySimuEngine.Shader: A depth map {} has been established".format(self.depthTex))
 
         glBindTexture(GL_TEXTURE_2D, self.depthTex)
 
@@ -124,7 +123,8 @@ class Shader:
 
         result = glCheckFramebufferStatus(GL_FRAMEBUFFER)
         if result != GL_FRAMEBUFFER_COMPLETE:
-            print("Framebuffer is not complete.")
+            self.core_component.log_component.Slog(MessageAttribute.EError,
+                                                   "A message from PySimuEngine.Shader: Framebuffer is not complete.")
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
 

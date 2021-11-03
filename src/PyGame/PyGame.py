@@ -41,24 +41,24 @@ class MyPygame:
     def exec_event(self, event):
         eye, center, eye_up = copy.deepcopy(self.core_component.camera.get_look_at_params())
         if event.type == QUIT:
-            print("Interrupt by quit the PyGame window!")
+            self.core_component.log_component.Slog(MessageAttribute.EError, "Interrupt by quit the PyGame window!")
             self.quit()
             sys.exit()
         elif event.type == KEYDOWN:
             if event.key == K_UP:
-                print("KeyUp introduced!")
+                self.core_component.log_component.Slog(MessageAttribute.EInfo, "KeyUp introduced!")
                 eye[2] += 0.2
                 self.core_component.camera.update_mvp(eye=eye)
             if event.key == K_DOWN:
-                print("KeyDown introduced!")
+                self.core_component.log_component.Slog(MessageAttribute.EInfo, "KeyDown introduced!")
                 eye[2] -= 0.2
                 self.core_component.camera.update_mvp(eye=eye)
             if event.key == K_RIGHT:
-                print("KetRight introduced!")
+                self.core_component.log_component.Slog(MessageAttribute.EInfo, "KetRight introduced!")
                 eye[1] += 0.2
                 self.core_component.camera.update_mvp(eye=eye)
             if event.key == K_LEFT:
-                print("KeyLeft introduced!")
+                self.core_component.log_component.Slog(MessageAttribute.EInfo, "KeyLeft introduced!")
                 eye[1] -= 0.2
                 self.core_component.camera.update_mvp(eye=eye)
         elif event.type == MOUSEBUTTONDOWN:
