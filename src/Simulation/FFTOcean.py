@@ -39,7 +39,7 @@ class FFTOcean:
     def __init__(self, core_component):
         self.core_component = core_component
         self.random_seed = 0
-        self.need_render = False
+        self.need_render = True
 
         self.gravity = 9.8
         self.wind_speed_V = 1.0
@@ -151,7 +151,7 @@ class FFTOcean:
                         indices.append(int(i * self.grid_resolution + (j + 1)))
                         indices.append(int((i + 1) * self.grid_resolution + (j + 1)))
                 indices = np.array(indices, dtype=np.int)
-                self.VAO, self.VBO = self.core_component.opengl_pipe.bind_buffer.bind_VAO("normal",
+                self.VAO, self.VBO = self.core_component.opengl_pipe.bind_buffer.bind_VAO("glossy",
                                                                                           data=data,
                                                                                           indices=indices,
                                                                                           Pointer_info=['vertices',
