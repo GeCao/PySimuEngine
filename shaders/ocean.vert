@@ -6,9 +6,16 @@ out vec3 Normal;
 out vec3 Position;
 out vec4 ShadowCoord;
 
+uniform vec3 viewPos;
+
 uniform mat4 ModelViewProjectionMatrix;
 uniform mat4 ShadowMatrix;
 uniform mat4 ModelViewMatrix;
+uniform mat4 INV_PROJECTION;
+uniform mat4 INV_VIEW_ORIGIN;
+
+uniform float near_plane;
+uniform float far_plane;
 
 void main()
 {

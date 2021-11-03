@@ -215,6 +215,10 @@ class Shader:
             self.uniform_dict['ShallowWaterColor'] = np.array([0.1, 0.7, 0.3], dtype=np.float32)
         if 'FarWaterColor' in uniform_list:
             self.uniform_dict['FarWaterColor'] = np.array([0.01, 0.07, 0.03], dtype=np.float32)
+        if 'INV_PROJECTION' in uniform_list:
+            self.uniform_dict['INV_PROJECTION'] = np.linalg.inv(self.core_component.camera.get_projection_mat())
+        if 'INV_VIEW_ORIGIN' in uniform_list:
+            self.uniform_dict['INV_VIEW_ORIGIN'] = np.linalg.inv(self.core_component.camera.get_view_mat())
 
         for i, uniform_name in enumerate(self.uniform_dict.keys()):
             self.bind_shader_uniform.bind_uniform(shaderProgram, uniform_name, self.uniform_dict[uniform_name])
