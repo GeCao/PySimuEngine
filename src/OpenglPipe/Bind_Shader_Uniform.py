@@ -31,10 +31,43 @@ class BindShaderUniform:
     def initialization(self):
         self.initialized = True
 
+    def bind_texture_uniform(self, shaderProgram, uniform_name, uniform_data=None, TexID=None, push_texture_change=False):
+        if uniform_name in self.texture_name_ID_map and not push_texture_change:
+            return
+
+        if TexID is not None:
+            pass
+        elif uniform_data is not None:
+            TexID = glGenTextures(1)
+            self.core_component.log_component.InfoLog(
+                "A message from PySimuEngine.BindShaderUniform: TexID of {} = {}".format(uniform_name, TexID))
+            glBindTexture(GL_TEXTURE_2D, TexID)
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB if uniform_data.shape[2] == 3 else GL_RGBA,
+                         uniform_data.shape[0], uniform_data.shape[1], 0,
+                         GL_RGB if uniform_data.shape[2] == 3 else GL_RGBA,
+                         GL_FLOAT, uniform_data.data)
+            glGenerateMipmap(GL_TEXTURE_2D)
+        else:
+            self.core_component.ErrorLog(
+                "You want to bind a texture = {}, but no textureID or texture data info input".format(uniform_name))
+
+        glActiveTexture(GL_TEXTURE0 + TexID)
+        glBindTexture(GL_TEXTURE_2D, TexID)
+        Tex_loc = glGetUniformLocation(shaderProgram, uniform_name)
+        glUniform1i(Tex_loc, TexID)
+        self.texture_name_ID_map[uniform_name] = TexID
+        self.texture_counter += 1
+
     """
     Always use this while assure that the shaderProgram has been used already!
     """
-    def bind_uniform(self, shaderProgram, uniform_name, uniform_data, num=1, push_texture_change=False):
+    def bind_uniform(self, shaderProgram, uniform_name, uniform_data=None, num=1, TexID=None, push_texture_change=False):
         location = glGetUniformLocation(shaderProgram, uniform_name)
         int_0 = int(0)
         float_0 = float(0)
@@ -43,30 +76,7 @@ class BindShaderUniform:
             data_shape = uniform_data.shape
             data_type = uniform_data.dtype
             if len(data_shape) == 3:
-                if uniform_name in self.texture_name_ID_map and not push_texture_change:
-                    return
-                TexID = glGenTextures(1)
-                self.core_component.log_component.Slog(MessageAttribute.EInfo,
-                    "A message from PySimuEngine.BindShaderUniform: TexID of {} = {}".format(uniform_name, TexID))
-                glBindTexture(GL_TEXTURE_2D, TexID)
-
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB if uniform_data.shape[2] == 3 else GL_RGBA,
-                             uniform_data.shape[0], uniform_data.shape[1], 0,
-                             GL_RGB if uniform_data.shape[2] == 3 else GL_RGBA,
-                             GL_FLOAT, uniform_data.data)
-                glGenerateMipmap(GL_TEXTURE_2D)
-
-                glActiveTexture(GL_TEXTURE0 + TexID)
-                glBindTexture(GL_TEXTURE_2D, TexID)
-                Tex_loc = glGetUniformLocation(shaderProgram, uniform_name)
-                glUniform1i(Tex_loc, TexID)
-                self.texture_name_ID_map[uniform_name] = TexID
-                self.texture_counter += 1
+                self.bind_texture_uniform(shaderProgram, uniform_name, uniform_data, TexID, push_texture_change)
             elif DataSize(data_shape) == DataSize.SCALAR:
                 if(DataType(data_type) == DataType.NP_INT):
                     glUniform1i(location, uniform_data[0])

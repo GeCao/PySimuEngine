@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 import os
-from ..utils.utils import _read_img_2d, MessageAttribute
+from ..utils.utils import _read_img_2d, MessageAttribute, normalize
 
 class Resource:
     def __init__(self, resource_component, file_path=None):
@@ -39,20 +39,110 @@ class MaterialResource(Resource):
 
 
 class MeshResource(Resource):
-    def __init__(self, resource_component, file_path=None):
+    def __init__(self, resource_component, file_path=None, data=None, faces=None):
         Resource.__init__(self, resource_component=resource_component)
         self.file_path = file_path
-        self.data = []
-        self.faces = []
+        self.data = [] if data is None else data
+        self.faces = [] if faces is None else faces
         self.Pointer_info = []
         self.model_mat = np.eye(4, dtype=np.float32)
         self.mtl = None
+        self.need_update_to_pipe = False
 
     def initialization(self, scale=None, translate=None):
-        self.load_data(file_path=self.file_path, scale=scale, translate=translate)
+        if len(self.data) == 0:
+            self.load_data(file_path=self.file_path, scale=scale, translate=translate)
+            self.data = np.array(self.data, dtype=np.float32)
+            self.faces = np.array(self.faces, dtype=np.int)
+            self.generate_normals_automatically()
+            if 'normals' not in self.Pointer_info:
+                self.generate_normals_automatically()
+                self.Pointer_info = ['vertices', 'normals']
+        else:
+            if len(self.faces) == 0:
+                self.generate_faces_automatically()
+
+            for i in range(len(self.data)):
+                self.data[i][0], self.data[i][1], self.data[i][2] = \
+                    self.data[i][0] * scale[0], self.data[i][1] * scale[1], self.data[i][2] * scale[2]
+                self.data[i][0], self.data[i][1], self.data[i][2] = \
+                    self.data[i][0] + translate[0], self.data[i][1] + translate[1], self.data[i][2] + translate[2]
+
+            if len(self.data[0]) == 8:
+                self.Pointer_info = ['vertices', 'normals', 'texcoords']
+            elif len(self.data[0]) == 6:
+                self.Pointer_info = ['vertices', 'normals']
+            elif len(self.data[0]) == 3:
+                self.generate_normals_automatically()
+                self.Pointer_info = ['vertices', 'normals']
         self.data = np.array(self.data, dtype=np.float32)
         self.faces = np.array(self.faces, dtype=np.int)
+
+        self.need_update_to_pipe = True
         self.initialized = True
+
+    def generate_faces_automatically(self):
+        if len(self.faces) > 0:
+            self.resource_component.core_component.log_component.WarnLog(
+                "Your original faces might be replaced, please inform yourself this change in your mind")
+            self.faces = []
+
+        self.faces = [i for i in range(len(self.data))]
+
+    def update(self, data):
+        if data.shape[1] == 3:
+            self.data[:, 0:3] = data
+            self.generate_normals_automatically()
+        elif data.shape[1] == 6:
+            self.data[:, 0:6] = data
+        elif data.shape[1] == 8:
+            self.data = data
+        else:
+            self.resource_component.core_component.log_component.WarnLog("Error for updated data format")
+        self.need_update_to_pipe = True
+
+    def generate_normals_automatically(self):
+        if len(self.data) == 0:
+            self.resource_component.core_component.log_component.WarnLog(
+                "Can not generate normals if we have no any information about this mesh")
+            return
+        if len(self.data[0]) == 3:
+            self.data = np.pad(self.data, pad_width=((0, 0), (0, 3)), mode='constant', constant_values=0)
+        elif len(self.data[0]) < 6:
+            self.resource_component.core_component.log_component.ErrorLog(
+                "Can not read this Mesh Resource data format!")
+        else:
+            for i in range(len(self.data)):
+                self.data[i][3], self.data[i][4], self.data[i][5] = 0, 0, 0
+        if len(self.faces) == 0:
+            self.resource_component.core_component.log_component.WarnLog(
+                "Can not generate normals since you did not indicate faces, we will generate faces for you automatically")
+            self.generate_faces_automatically()
+        used_count = [0 for i in range(len(self.data))]
+        for i in range(len(self.faces) // 3):
+            idx1, idx2, idx3 = self.faces[3*i], self.faces[3*i + 1], self.faces[3*i + 2]
+            vec1 = self.data[idx2, 0:3] - self.data[idx1, 0:3]
+            vec2 = self.data[idx3, 0:3] - self.data[idx2, 0:3]
+            normal = np.cross(vec1, vec2)
+            normal_len = np.sqrt(normal.dot(normal))
+            if normal_len > 0:
+                normal = normal / normal_len
+            else:
+                normal = [0, 1, 0]
+                self.resource_component.core_component.log_component.ErrorLog(
+                    "The normal has been generated wrongly, has already set it as [0, 1, 0]")
+            self.data[idx1][3:6] += normal
+            self.data[idx2][3:6] += normal
+            self.data[idx3][3:6] += normal
+            used_count[idx1] += 1
+            used_count[idx2] += 1
+            used_count[idx3] += 1
+        for i in range(len(self.data)):
+            if used_count[i] != 0:
+                self.data[i][3:6] = normalize(self.data[i][3:6])
+            else:
+                self.data[i][3], self.data[i][4], self.data[i][5] = 0, 1, 0
+
 
     def set_modelmat(self, scale=None, rotation=None, translate=None):
         self.model_mat = np.eye(4, dtype=np.float32)
@@ -153,7 +243,7 @@ class MeshResource(Resource):
                 self.data[vert_idx_1][6:8] = texcoords[f_texcoords_idx[3 * i]][0:2]
                 self.data[vert_idx_2][6:8] = texcoords[f_texcoords_idx[3 * i + 1]][0:2]
                 self.data[vert_idx_3][6:8] = texcoords[f_texcoords_idx[3 * i + 2]][0:2]
-        self.resource_component.core_component.log_component.Slog(MessageAttribute.EInfo,
+        self.resource_component.core_component.log_component.InfoLog(
             "Newly read an object with all the vert nums = {}, face nums = {}, texcoord nums = {}, normal nums = {}".
                                                                   format(index_vert, len(self.faces), len(f_texcoords_idx),
                                                                          len(f_normals_idx)))

@@ -4,6 +4,7 @@ log/
 .idea
 .ropeproject
 .settings
+src/Simulation/deformation/fourier_neural_operator/
 *.log
 *.pyc
 *.py~

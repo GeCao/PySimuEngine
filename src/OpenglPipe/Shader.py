@@ -1,4 +1,4 @@
-import os
+import os, random
 
 import numpy as np
 from OpenGL.GL import *
@@ -25,6 +25,12 @@ class Shader:
         # Light related
         self.lightPos = np.array([1.2, 1.0, 2.0], dtype=np.float32)
         self.lightColor = np.array([1, 1, 1], dtype=np.float32)
+
+        # deferred light related
+        self.deferred_lightPos = (np.random.rand(32, 3) * 6.0 - 3.0).astype(np.float32)
+        self.deferred_lightColor = (np.random.rand(32, 3) * 0.5 + 0.5).astype(np.float32)
+        # self.deferred_lightPos = np.array([[1.2, 1.0, 2.0]], dtype=np.float32)
+        # self.deferred_lightColor = np.array([[1.2, 1.0, 2.0]], dtype=np.float32)
 
         self.initialized = False
 
@@ -168,6 +174,19 @@ class Shader:
         self.uniform_dict[uniform_name] = uniform_data
         self.bind_shader_uniform.bind_uniform(shaderProgram, uniform_name, uniform_data)
 
+    def activate_shader_for_geometry_pass(self):
+        shader_name = "GeometryPass"
+        shaderProgram = self.get_shaderProgram(shader_name)
+        glUseProgram(shaderProgram)
+
+        self.uniform_dict['ViewProjection'] = self.core_component.camera.get_modelviewprojection_mat()
+        self.bind_shader_uniform.bind_uniform(shaderProgram, 'ViewProjection', self.uniform_dict['ViewProjection'])
+
+        self.uniform_dict['model'] = np.eye(4, dtype=np.float32)
+        self.bind_shader_uniform.bind_uniform(shaderProgram, 'model', self.uniform_dict['model'].T)
+
+        self.core_component.opengl_pipe.bind_buffer.draw_VAO(push_pass="geometrypass")
+
     def activate_shader_for_shadow_pass(self):
         shader_name = "shadowpass"
         shaderProgram = self.get_shaderProgram(shader_name)
@@ -182,7 +201,28 @@ class Shader:
                                               'ModelViewProjectionMatrix',
                                               self.uniform_dict['ModelViewProjectionMatrix'])
 
-    def activate_shader(self, shader_name, useShadow=False):
+    def activate_deferred_shader(self, shader_name="LightingSimple"):
+        shaderProgram = self.get_shaderProgram(shader_name)
+        uniform_list = self.shaders_uniform_dict[shader_name]
+        glUseProgram(shaderProgram)
+
+        self.uniform_dict['viewPos'] = self.core_component.camera.eye
+
+        for i in range(self.deferred_lightPos.shape[0]):
+            self.uniform_dict['lights[{}].Position'.format(i)] = self.deferred_lightPos[i, :]
+            self.uniform_dict['lights[{}].Color'.format(i)] = self.deferred_lightColor[i, :]
+
+            self.uniform_dict['lights[{}].Linear'.format(i)] = 0.7
+            self.uniform_dict['lights[{}].Quadratic'.format(i)] = 1.8
+
+            max_Color_coeff = self.deferred_lightColor[i, :].max()
+            radius = (-0.7 + np.sqrt(0.49 - 4 * 1.8 * (1.0 - (256.0 / 5.0) * max_Color_coeff))) / (2.0 * 1.8)
+            self.uniform_dict['lights[{}].Radius'.format(i)] = radius
+
+        for i, uniform_name in enumerate(self.uniform_dict.keys()):
+            self.bind_shader_uniform.bind_uniform(shaderProgram, uniform_name, self.uniform_dict[uniform_name])
+
+    def activate_forward_shader(self, shader_name, useShadow=False):
         shaderProgram = self.get_shaderProgram(shader_name)
         uniform_list = self.shaders_uniform_dict[shader_name]
         glUseProgram(shaderProgram)

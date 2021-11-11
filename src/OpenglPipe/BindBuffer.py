@@ -53,11 +53,15 @@ class BindBuffer:
         glBindVertexArray(0)  # 复位VAO
         return VAO, VBO
 
-    def draw_VAO(self, push_for_shadow_pass=False):
+    def draw_VAO(self, push_pass=None):
         for VAO_name in self.VAO_dict.keys():
             shaderProgram = self.core_component.opengl_pipe.shader.get_shaderProgram(VAO_name)
-            if push_for_shadow_pass:
+            if push_pass == "shadowpass":
                 shaderProgram = self.core_component.opengl_pipe.shader.get_shaderProgram("shadowpass")
+            elif push_pass == "geometrypass":
+                shaderProgram = self.core_component.opengl_pipe.shader.get_shaderProgram("GeometryPass")
+            elif push_pass is not None:
+                shaderProgram = self.core_component.opengl_pipe.shader.get_shaderProgram(push_pass)
             glUseProgram(shaderProgram)
             for i, VAO in enumerate(self.VAO_dict[VAO_name]):
                 len_indices = int(self.VAO_indices_size[VAO_name][i])

@@ -3,6 +3,7 @@ import os
 
 from ..PyGame.PyGame import MyPygame
 from ..OpenglPipe.OpenglPipe import OpenglPipe
+from .Simulator_Component import SimulatorComponent
 from .Resoure_Component import ResourceComponent
 from .Log_Component import LogComponent
 from .Scene_Component import SceneComponent
@@ -16,7 +17,9 @@ class CoreComponent:
     def __init__(self):
         self.root_path = os.path.abspath(os.curdir)
         self.src_path = os.path.join(self.root_path, 'src')
+        self.simulation_path = os.path.join(self.src_path, 'Simulation')
         self.log_component = None
+        self.simulator_component = None
         self.resource_component = None
         self.scene_component = None
         self.my_pygame = None
@@ -31,6 +34,9 @@ class CoreComponent:
 
         self.log_component = LogComponent(self, log_to_disk=True)
         self.log_component.initialization()
+
+        self.simulator_component = SimulatorComponent(self)
+        self.simulator_component.initialization()
 
         self.resource_component = ResourceComponent(self)
         self.resource_component.initialization()
@@ -51,6 +57,8 @@ class CoreComponent:
     def update(self):
         self.camera.update()
         self.scene_component.update()
+        self.resource_component.update()
+        self.simulator_component.update()
         self.opengl_pipe.update()
         # self.fluid_solver.update()
 

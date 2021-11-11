@@ -39,7 +39,7 @@ class FFTOcean:
     def __init__(self, core_component):
         self.core_component = core_component
         self.random_seed = 0
-        self.need_render = True
+        self.need_render = False
 
         self.gravity = 9.8
         self.wind_speed_V = 1.0
