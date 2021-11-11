@@ -15,15 +15,16 @@ python main.py
 
 ### Run Sample
 ![result1](data/PCF.png)
+![result1](data/starfish.gif)
 
 ### Features
 
 * Rendering
     - [x] PCF Shadow
     - [x] Sky Box
-    - [ ] Transparent Object Rendering 
+    - [ ] Translucent Object Rendering 
     - [ ] PRT
-    - [ ] Deferred Rendering
+    - [x] Deferred Rendering
     - [ ] Depth of Field for Camera
     - [ ] SSAO
     - [ ] TAA
@@ -33,10 +34,10 @@ python main.py
     
 * Simulation
     - [x] FFT Ocean
-    - [ ] Cloth Simulation
+    - [x] Cloth Simulation
     - [ ] General Fluid Simulation
     - [ ] LBM Fluid Simulation
-    - [ ] Deformable Object Simulation
+    - [x] Deformable Object Simulation
     - [ ] Collision Detection
     
 * Game Design
